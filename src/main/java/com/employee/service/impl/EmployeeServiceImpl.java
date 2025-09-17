@@ -1,5 +1,6 @@
 package com.employee.service.impl;
 
+import com.employee.exception.EmployeeNotFoundException;
 import com.employee.model.Employee;
 import com.employee.repository.EmployeeRepository;
 import com.employee.service.EmployeeService;
@@ -21,8 +22,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Optional<Employee> getEmployee(Long id) {
-        return employeeRepository.findById(id);
+    public Employee getEmployee(Long id) {
+        return employeeRepository.findById(id).orElseThrow(()
+                -> new EmployeeNotFoundException(id));
     }
 
     @Override
@@ -51,7 +53,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Optional<Employee> updateEmployeeDetails(Long id, Map<String, Object> updates) {
         Employee employee = employeeRepository.findById(id).orElseThrow(()
-                -> new RuntimeException("Employee not found with id: "+ id));
+                -> new EmployeeNotFoundException(id));
 
         updates.forEach((key, value) -> {
             switch (key) {
@@ -65,7 +67,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                     employee.setEmail((String) value);
                     break;
                 default:
-                    throw new IllegalArgumentException("Field "+key+" id not valid");
+                    throw new IllegalArgumentException("Field "+key+" not valid");
             }
         });
         return Optional.of(employeeRepository.save(employee));

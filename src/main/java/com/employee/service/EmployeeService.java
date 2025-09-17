@@ -10,7 +10,7 @@ public interface EmployeeService {
 
     void addEmployee(Employee e);
 
-    Optional<Employee> getEmployee(Long id);
+    Employee getEmployee(Long id);
 
     List<Employee> getAllEmployees();
 

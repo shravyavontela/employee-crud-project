@@ -1,5 +1,6 @@
 package com.employee.controller;
 
+import com.employee.exception.EmployeeNotFoundException;
 import com.employee.model.Employee;
 import com.employee.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/crud/employees")
@@ -28,9 +30,9 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Employee> getEmployee(@PathVariable Long id) {
-        return employeeService.getEmployee(id).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Employee> getEmployee(@PathVariable Long id) throws EmployeeNotFoundException {
+        return Optional.of(employeeService.getEmployee(id)).map(ResponseEntity::ok)
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
@@ -39,26 +41,32 @@ public class EmployeeController {
         if (deleted)
             return ResponseEntity.ok("Deleted Employee with id: " + id);
         else
-            return ResponseEntity.notFound().build();
+            throw new EmployeeNotFoundException(id);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {
-        return employeeService.updateEmployee(id, employee).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return employeeService.updateEmployee(id, employee).map(ResponseEntity::ok)
+                    .orElseThrow(() -> new EmployeeNotFoundException(id));
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw e;
+        }
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Employee> updateEmployeeDetails(@PathVariable Long id,
-                                                          @RequestBody Map<String, Object> updates) {
+                                                   @RequestBody Map<String, Object> updates) {
         try {
             Employee updatedEmployee = employeeService.updateEmployeeDetails(id, updates).get();
             return ResponseEntity.ok(updatedEmployee);
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            throw e;
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            throw e;
         }
     }
 }
