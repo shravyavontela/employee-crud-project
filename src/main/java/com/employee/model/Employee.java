@@ -3,15 +3,26 @@ package com.employee.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+
 
 @Entity
-@JsonIgnoreProperties()
+@JsonIgnoreProperties
 public class Employee {
 
     @Id
     private Long id;
+
+    @NotBlank(message = "Name should not be blank")
     private String name;
+
+    @Positive(message = "Age must be a positive number")
     private int age;
+
+    @NotBlank(message = "Email should not be blank")
+    @Email(message = "Email should be valid")
     private String email;
 
     public Employee() {
